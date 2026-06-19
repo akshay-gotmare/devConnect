@@ -1,10 +1,26 @@
-import { useSelector } from "react-redux";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router";
+import { BASE_URL } from "../utils/constants";
+import { removeFeed } from "../utils/store/feedSlice";
+import { removeConnection } from "../utils/store/conectionSlice";
+import { removeUser } from "../utils/store/userSlice";
 
 const NavBar = () => {
   const user = useSelector((store) => store.user);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    await axios.get(BASE_URL + "/logout", { withCredentials: true });
+    dispatch(removeUser);
+    dispatch(removeFeed);
+    dispatch(removeConnection);
+    navigate("/login");
+  };
 
   return (
-    <div className="navbar bg-base-200 shadow-sm">
+    <div className="navbar bg-base-200 shadow-sm sticky top-0 z-10">
       <div className="navbar-start">
         <label className="input">
           <svg
@@ -29,9 +45,9 @@ const NavBar = () => {
         </label>
       </div>
       <div className="navbar-center">
-        <a className="btn btn-primary text-2xl font-bold font-mono">
+        <Link to="/" className="btn btn-primary text-2xl font-bold font-mono">
           DEV.connect
-        </a>
+        </Link>
       </div>
       {user && (
         <div className="navbar-end">
@@ -47,7 +63,11 @@ const NavBar = () => {
               <div className="w-10 rounded-full">
                 <img
                   alt="Tailwind CSS Navbar component"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                  src={
+                    user.photoUrl
+                      ? user.photoUrl
+                      : "https://i.pinimg.com/736x/fb/7a/17/fb7a17e227af3cf2e63c756120842209.jpg"
+                  }
                 />
               </div>
             </div>
@@ -56,16 +76,18 @@ const NavBar = () => {
               className="menu menu-sm dropdown-content bg-primary-content rounded-box z-1 mt-3 w-52 p-2 shadow"
             >
               <li>
-                <a className="justify-between">
+                <Link to="/profile" className="justify-between">
                   Profile
-                  <span className="badge">New</span>
-                </a>
+                </Link>
               </li>
               <li>
-                <a>Settings</a>
+                <Link to="/connections">Connections</Link>
               </li>
               <li>
-                <a>Logout</a>
+                <Link to="/requests">Requests</Link>
+              </li>
+              <li>
+                <a onClick={handleLogout}>Logout</a>
               </li>
             </ul>
           </div>

@@ -1,33 +1,53 @@
-import { useEffect, useState } from "react";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
-import { addUser } from "../utils/store/userSlice";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { BASE_URL } from "../utils/constants";
 
-const Login = () => {
+const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [error, setError] = useState("");
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((store) => store.user);
 
-  const handleLogin = async () => {
+  const handleChange = (value, type) => {
+    switch (type) {
+      case "email":
+        setEmail(value);
+        break;
+      case "password":
+        setPassword(value);
+        break;
+      case "firstName":
+        setFirstName(value);
+        break;
+      case "lastName":
+        setLastName(value);
+        break;
+      default:
+        return;
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
       const response = await axios.post(
-        `${BASE_URL}/login`,
-        { email, password },
+        BASE_URL + "/signup",
+        { firstName, lastName, email, password },
         { withCredentials: true },
       );
-
-      dispatch(addUser(response.data.data));
-      return navigate("/");
-
-      // setEmail("");
-      // setPassword("");
+      if (response.status === 200) {
+        setFirstName("");
+        setLastName("");
+        setEmail("");
+        setPassword("");
+        navigate("/login");
+      }
     } catch (error) {
-      alert(error);
+      setError(error?.response?.data?.error);
     }
   };
 
@@ -38,23 +58,23 @@ const Login = () => {
           DEV.Connect
         </h1>
         <h1 className="text-xl font-extrabold text-neutral-content self-center mb-2 tracking-tight">
-          Log in
+          Sign up
         </h1>
 
         <span className="self-center text-sm text-base-content/70 font-medium mb-6">
-          Don't have an account?
+          Already have an account?
           <Link
-            to="/signup"
+            to="/login"
             className="text-secondary hover:underline cursor-pointer ml-1 font-semibold"
           >
-            Register
+            Log in
           </Link>
         </span>
 
-        <button className="btn btn-neutral w-full flex justify-center items-center gap-3 bg-[#1e2330] border-none normal-case font-medium text-neutral-content py-4 h-auto rounded-lg">
+        {/* <button className="btn btn-neutral w-full flex justify-center items-center gap-3 bg-[#1e2330] border-none normal-case font-medium text-neutral-content py-4 h-auto rounded-lg">
           <i className="fa-brands fa-google text-indigo-400 text-lg"></i>
           Log in with Google
-        </button>
+        </button> */}
 
         <div className="divider text-xs text-base-content/40 my-6 font-semibold tracking-wider">
           OR
@@ -64,13 +84,40 @@ const Login = () => {
           <label className="form-control w-full">
             <div className="label pt-0 pb-1">
               <span className="label-text text-sm text-base-content/80 font-medium">
-                Email
+                First Name *
+              </span>
+            </div>
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => handleChange(e.target.value, "firstName")}
+              className="input bg-[#161a23] border border-gray-800 focus:border-indigo-500 w-full rounded-lg h-12 text-neutral-content focus:outline-none"
+            />
+          </label>
+
+          <label className="form-control w-full">
+            <div className="label pt-0 pb-1">
+              <span className="label-text text-sm text-base-content/80 font-medium">
+                Last Name *
+              </span>
+            </div>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => handleChange(e.target.value, "lastName")}
+              className="input bg-[#161a23] border border-gray-800 focus:border-indigo-500 w-full rounded-lg h-12 text-neutral-content focus:outline-none"
+            />
+          </label>
+          <label className="form-control w-full">
+            <div className="label pt-0 pb-1">
+              <span className="label-text text-sm text-base-content/80 font-medium">
+                Email *
               </span>
             </div>
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => handleChange(e.target.value, "email")}
               className="input bg-[#161a23] border border-gray-800 focus:border-indigo-500 w-full rounded-lg h-12 text-neutral-content focus:outline-none"
             />
           </label>
@@ -78,22 +125,20 @@ const Login = () => {
           <label className="form-control w-full">
             <div className="label pt-0 pb-1 flex justify-between items-center">
               <span className="label-text text-sm text-base-content/80 font-medium">
-                Password
+                Password *
               </span>
-              <a className="text-sm text-accent hover:underline cursor-pointer font-medium">
-                Forgot password?
-              </a>
             </div>
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => handleChange(e.target.value, "password")}
               className="input bg-[#161a23] border border-gray-800 focus:border-indigo-500 w-full rounded-lg h-12 text-neutral-content focus:outline-none"
             />
           </label>
+          {error && <p className="text-red-500">Error: {error}</p>}
         </div>
 
-        <div className="form-control mt-5">
+        {/* <div className="form-control mt-5">
           <label className="cursor-pointer flex items-center self-start gap-3 select-none">
             <input
               type="checkbox"
@@ -103,17 +148,17 @@ const Login = () => {
               Remember me
             </span>
           </label>
-        </div>
+        </div> */}
 
         <button
           onClick={handleLogin}
           className="btn btn-primary w-full mt-8 py-4 h-auto text-base font-bold rounded-lg tracking-wide border-none text-slate-900"
         >
-          Log in
+          Register
         </button>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default Signup;
